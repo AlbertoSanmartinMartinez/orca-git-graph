@@ -1,0 +1,4 @@
+# Project-path copy for discoverability; robots rules are authoritative only at the origin root.
+User-agent: *
+Allow: /orca-git-graph/
+Sitemap: https://pty0220.github.io/orca-git-graph/sitemap.xml

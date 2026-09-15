@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.DS_Store
+config.json
+.watcher.lock
+*.log
+*.err
+runtime/
+dist/
+playwright-report/
+test-results/

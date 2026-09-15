@@ -1,0 +1,419 @@
+# Orca Git Graph
+
+**A Git commit graph inside the Orca IDE's right sidebar, with automatic workspace switching.**
+
+View branches, merges, tags, authors, and commit details without leaving Orca. Select a different local workspace in the left sidebar and the graph follows its exact Git worktree and checked-out HEAD.
+
+[Documentation](https://pty0220.github.io/orca-git-graph/) · [Interactive demo](https://pty0220.github.io/orca-git-graph/demo.html) · [Installation guide](installation.md) · [Troubleshooting](troubleshooting.md) · [AI documentation index](https://pty0220.github.io/orca-git-graph/llms.txt)
+
+![Orca Git Graph: colored branch lanes, reference labels, and commit history from a fictional example repository](assets/git-graph.png)
+
+*The screenshot and interactive demo use fictional Git history. The installed plugin displays your own local repository in Orca's right sidebar.*
+
+## Features
+
+- Colored Git branch and merge lanes, with branch and tag labels.
+- Follows the selected Orca project and worktree, including detached HEAD.
+- Search commit messages, authors, emails, hashes, and references.
+- Filter the displayed history by branch or tag; jump to HEAD.
+- Click a commit to inspect its message, parents, author, and changed files.
+- Local operation: no cloud service, telemetry, network server, pip packages, or Node.js runtime.
+- Read-only Git commands. No checkout, commit, fetch, push, or repository modification.
+
+## Quick start
+
+**Requirements:** Git, Python 3.9+, and Orca desktop. The desktop integration was tested with **Orca 1.4.185 on macOS**. Windows and Linux support is experimental; their filesystem/installer paths have automated tests, but desktop integration needs validation.
+
+Run these commands in an **Orca terminal**:
+
+```sh
+git clone https://github.com/pty0220/orca-git-graph.git
+cd orca-git-graph
+python3 install.py
+```
+
+The installer copies the runtime to `~/.local/share/orca-git-graph`, prints the plugin path, and attempts to open a **Git Graph Sync** terminal when it can identify the enclosing Orca workspace.
+
+Then register the plugin once:
+
+1. Open **Orca Settings → Plugins** and enable the plugin system.
+2. Expand **Development**, choose **Add path**, and paste the absolute plugin path printed by the installer.
+3. Select **Installed → Git Graph → Review and enable**. The plugin requests no Orca API capabilities and runs no plugin worker.
+4. Click the **layers icon, “Git Graph,”** in the right sidebar. It may appear in the `…` overflow menu.
+
+If the installer did not open a sync terminal, run this in an Orca terminal:
+
+```sh
+python3 ~/.local/share/orca-git-graph/run.py watch
+```
+
+**Keep Git Graph Sync running.** Closing that terminal or quitting Orca stops automatic updates. After reopening Orca, restart the command above. The installer does not silently edit Orca settings or grant permissions.
+
+Use **Development registration**, not the generic Git URL / Local folder plugin installer. Orca's normal installer copies the HTML; Development mode watches the live generated panel.
+
+See the [full installation guide](installation.md) for ZIP installation, custom locations, profiles, updates, and removal.
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[Selected Orca workspace] --> B[Local Python sync process]
+    B --> C[Read-only Git history]
+    C --> D[Generated HTML and SVG]
+    D --> E[Orca right-sidebar plugin]
+```
+
+The sync process reads the selected workspace from the configured Orca profile's local state file. It polls selection every 0.75 seconds and Git references every 10 seconds. On a change, it replaces the generated HTML atomically; Orca's development-plugin watcher reloads the panel. Workspace switching typically takes about 1–3 seconds for small local repositories, with additional Git collection time for larger histories.
+
+This is an independent community project. It is not affiliated with Orca, VS Code, or the VS Code Git Graph extension. It uses Orca's experimental plugin panel API and a version-dependent local state-file integration. See [architecture and compatibility](architecture.md).
+
+## Scope and limitations
+
+- Local repositories only; SSH, cloud, and remote workspaces show an explanatory message.
+- Up to 400 commits by default. Branch filtering operates within that loaded history.
+- Changed-file lists show up to 200 files per commit. Rename detection is disabled; renames appear as additions and deletions. Merge commits may have no file list.
+- The panel is a separate right-sidebar tab next to Source Control; it is not nested inside the built-in Changes view.
+- Refreshing the generated document resets search, filter, detail selection, and scroll position.
+- The selected Orca profile is fixed during installation. Reconfigure it if you switch profiles.
+- No automatic background service is installed. On macOS, a standalone LaunchAgent may lack access to Desktop/Documents repositories; run the watcher inside Orca instead.
+
+## Development
+
+Runtime dependencies are Python's standard library and Git. To run the core tests:
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+For browser checks and the fictional demo:
+
+```sh
+python3 -m pip install -r requirements-dev.txt
+python3 -m playwright install chromium
+python3 scripts/build_demo.py
+python3 scripts/test_browser.py
+```
+
+[Contributing](https://github.com/pty0220/orca-git-graph/blob/main/CONTRIBUTING.md) · [Security and privacy](https://github.com/pty0220/orca-git-graph/blob/main/SECURITY.md) · [Changelog](https://github.com/pty0220/orca-git-graph/blob/main/CHANGELOG.md) · [MIT license](https://github.com/pty0220/orca-git-graph/blob/main/LICENSE)
+
+## For AI assistants
+
+Start with [llms.txt](https://pty0220.github.io/orca-git-graph/llms.txt), then follow the installation, troubleshooting, and architecture links. [AGENTS.md](https://github.com/pty0220/orca-git-graph/blob/main/AGENTS.md) explains the repository layout and validation commands for coding agents. Search terms: **Orca IDE Git Graph plugin**, **Orca commit history**, **Orca sidebar Git visualization**, **automatic Git worktree switching**.
+
+The documentation is public and available as plain Markdown as well as HTML. These files aid discovery and interpretation; they do not guarantee inclusion or ranking in any search engine or AI answer.
+
+
+---
+
+# Install Orca Git Graph
+
+Orca Git Graph adds an interactive Git history graph to the Orca desktop IDE's right sidebar. Setup has two parts: install the local sync tool, then register its panel in Orca once.
+
+## 1. Check the requirements
+
+- Orca desktop, tested on version 1.4.185 on macOS.
+- Python 3.9 or later: `python3 --version`.
+- Git: `git --version`.
+- A local repository already opened in Orca.
+
+No Node.js, npm, pip packages, GitHub token, administrator access, or network server is required at runtime. Downloading the source requires internet access. Windows/Linux desktop integration is experimental, even though the core code and installer are covered by automated tests.
+
+## 2. Download and install
+
+### Recommended: clone from an Orca terminal
+
+```sh
+git clone https://github.com/pty0220/orca-git-graph.git
+cd orca-git-graph
+python3 install.py
+```
+
+The installer copies the application into:
+
+```text
+~/.local/share/orca-git-graph/
+```
+
+It prints the full absolute plugin directory to paste into Orca. It also attempts to create a **Git Graph Sync** terminal in your current Orca workspace. If automatic terminal creation is unavailable, use the start command printed by the installer.
+
+### Alternative: download a ZIP
+
+1. Open [GitHub Releases](https://github.com/pty0220/orca-git-graph/releases).
+2. Download the source ZIP for the desired version and extract it.
+3. Open a terminal in the extracted folder.
+4. Run `python3 install.py`.
+
+You can also use GitHub's **Code → Download ZIP** for the current development version. Do not point Orca at the downloaded source's `plugin` directory: register the installed runtime path printed by the installer.
+
+### Windows
+
+From an Orca terminal with Python and Git installed:
+
+```powershell
+git clone https://github.com/pty0220/orca-git-graph.git
+cd orca-git-graph
+py -3 install.py --no-start
+py -3 "$HOME\.local\share\orca-git-graph\run.py" watch
+```
+
+Automatic terminal creation is intentionally disabled on Windows. Follow the same Development registration steps below. End-to-end Orca desktop behavior on Windows has not yet been verified.
+
+## 3. Register the live panel in Orca
+
+1. Open **Settings → Plugins**.
+2. Turn on **Plugin system**, if it is off.
+3. Expand the **Development** section near the bottom.
+4. Paste the **absolute plugin directory printed by the installer** into the development path field.
+5. Click **Add path**.
+6. Switch the plugin catalog to **Installed**.
+7. Find **Git Graph** by publisher `pty0220`.
+8. Choose **Review and enable**, then **Enable plugin**.
+9. Return to your workspace.
+10. Click the **layers icon** in the right-hand activity bar. Its tooltip is **Git Graph**. If it is hidden, open the `…` menu.
+
+The manifest declares zero Orca API capabilities and no background plugin worker. The separate Python sync process still reads your configured Orca state file and selected local Git repository.
+
+**Why Development mode?** This panel's HTML is regenerated as your project changes. Development mode reloads that live file. Orca's generic Git URL or Local folder installation copies a snapshot, so it is unsuitable for this release's live-update architecture.
+
+## 4. Start the sync process
+
+If **Git Graph Sync** is already running, leave it open. Otherwise run:
+
+```sh
+python3 ~/.local/share/orca-git-graph/run.py watch
+```
+
+Move between projects in Orca's left sidebar. The repository name, branch, HEAD, and graph should follow. The default selection poll is 0.75 seconds, followed by Git collection and Orca's panel reload. Small repositories usually switch within about 1–3 seconds.
+
+Keep the sync terminal running. After quitting and reopening Orca, restart it with the same command. Running the watcher twice for the same installation is rejected by a process lock.
+
+## Custom locations and multiple profiles
+
+Choose an installation directory:
+
+```sh
+python3 install.py --install-dir "$HOME/tools/orca-git-graph" --no-start
+```
+
+Select a specific Orca profile:
+
+```sh
+python3 install.py --profile local-default
+```
+
+Or supply the exact state-file path:
+
+```sh
+python3 install.py --orca-state "/path/to/orca/profile/orca-data.json"
+```
+
+Default Orca data roots:
+
+| Platform | Data root |
+| --- | --- |
+| macOS | `~/Library/Application Support/orca` |
+| Linux | `${XDG_CONFIG_HOME:-~/.config}/orca` |
+| Windows | `%APPDATA%\orca` |
+
+`ORCA_USER_DATA_PATH`, when set, overrides the root. The installer searches profile directories for `orca-data.json`. If multiple profiles exist, it asks for an explicit `--profile` or `--orca-state` argument rather than choosing one silently.
+
+## Configuration
+
+The installed `config.json` contains:
+
+```json
+{
+  "orca_state_path": "/path/to/the/selected/profile/orca-data.json",
+  "limit": 400,
+  "git_interval": 10,
+  "selection_interval": 0.75
+}
+```
+
+Change the limit or intervals, then restart Git Graph Sync. `limit` must be 1–2000; intervals must be at least 0.2 seconds. Large histories take longer to collect and render. Runtime data remains outside the source checkout.
+
+## Update
+
+1. Stop Git Graph Sync with `Ctrl+C` in its terminal.
+2. In the source checkout, run:
+
+   ```sh
+   git pull --ff-only
+   python3 install.py
+   ```
+
+3. Keep the same Development path registered. If the plugin manifest changes, Orca may request another review.
+4. Start Git Graph Sync if the installer did not start it.
+
+The installer preserves your commit limit and polling intervals. If you originally used a custom profile or installation path, pass those flags again. It refuses to overwrite an unrecognized nonempty directory or update a running watcher.
+
+## Uninstall
+
+1. Stop the **Git Graph Sync** terminal.
+2. In **Settings → Plugins → Development**, remove the installed plugin path.
+3. Delete the `orca-git-graph` runtime directory you selected during installation.
+4. Optionally delete the cloned source checkout.
+
+No Git repository contents, Orca application files, startup services, or system settings are modified by the installer.
+
+## Verify your installation
+
+```sh
+python3 ~/.local/share/orca-git-graph/run.py doctor
+```
+
+Check the reported state file, current selection, and plugin directory. See [Troubleshooting](troubleshooting.md) if the panel is missing, blank, or not following the project.
+
+
+---
+
+# Architecture and compatibility
+
+Orca Git Graph combines a standard-library Python sync process with an Orca plugin panel. The panel is a standalone HTML document using JavaScript and SVG. It has no network client, external scripts, plugin worker, or requested Orca API capabilities.
+
+## Data flow
+
+1. Read the configured profile's `orca-data.json`.
+2. Resolve `workspaceSession.activeWorktreeId` to the exact selected local worktree path.
+3. Read Git commits, references, HEAD, upstream divergence, and changed-file names with argument-based subprocess calls.
+4. Escape commit metadata before embedding it in a self-contained HTML document.
+5. Atomically replace the runtime's `plugin/panel.html`.
+6. Orca's Development plugin watcher reloads the sandboxed iframe.
+
+`activeWorktreeId` takes precedence over `activeWorkspaceKey`. During development with Orca 1.4.185, the latter could retain a previous workspace after navigation. If `activeWorktreeId` explicitly becomes null, the graph clears; it does not silently fall back to an old project.
+
+## Modules
+
+| File | Responsibility |
+| --- | --- |
+| `install.py` | Locate Orca state, copy an isolated runtime, print registration steps, optionally open a sync terminal |
+| `orca_git_graph/workspace.py` | Platform paths, explicit profile selection, selected-workspace resolution |
+| `orca_git_graph/git_data.py` | Read-only Git commands and NUL-delimited parsing |
+| `orca_git_graph/app.py` | Polling, process lock, escaping, atomic HTML generation, diagnostics |
+| `orca_git_graph/panel.html` | SVG lane layout, commit table, search, branch filter, details |
+| `plugin/orca-plugin.json` | Right-sidebar panel contribution |
+| `tests/test_core.py` | Real temporary Git histories, selection edge cases, isolated installation |
+
+## Compatibility contract
+
+The initial desktop target is Orca 1.4.185 on macOS. The plugin manifest requires `>=1.4.185`, but that is a minimum version gate, not a guarantee that every later Orca build is compatible. Both the plugin API and the persisted selection format are experimental/version-dependent.
+
+Linux and Windows have filesystem and process-lock implementations and automated core checks. Their Orca desktop registration, profile layout, and live-reload behavior are not yet end-to-end validated. Remote/SSH/cloud workspaces are intentionally unsupported.
+
+When adapting a new Orca version, test actual left-sidebar switching in addition to parser unit tests. Update `workspace.py` if Orca's persisted selection contract changes. Do not modify Orca's signed app bundle or bypass its plugin review UI.
+
+## Performance and behavior
+
+Selection is polled every 0.75 seconds. Git fingerprints are checked every 10 seconds and immediately after selection changes. The HTML is only rewritten when selection or Git state changes. The process does not fetch remote updates; remote branch labels reflect locally available Git refs.
+
+The default history window is 400 commits, including detached HEAD. Branch filtering follows ancestors only within that loaded window. The renderer preserves graph context during search by dimming nonmatching rows rather than removing them.
+
+Changed-file lists are capped at 200 entries per commit. Rename detection is disabled, and merge commits can lack a file list. Refreshes replace the entire document, resetting filters and scroll position. These are deliberate first-release limitations, not full parity with the VS Code Git Graph extension.
+
+## Local data boundaries
+
+Runtime HTML contains metadata from the selected repository, including commit messages, names/emails, hashes, and file paths. Keep the runtime directory private. The installer places it outside the source checkout; generated data and local config are excluded from the public package.
+
+The sync process reads Orca's state JSON to select a workspace. It does not print or export the whole state document, read runtime authentication tokens, or call Orca's internal RPC endpoints. The optional installer terminal launch uses the public Orca CLI.
+
+
+---
+
+# Troubleshooting Orca Git Graph
+
+## The Git Graph icon is missing
+
+Enable the plugin system, add the **installed runtime plugin directory** under **Settings → Plugins → Development**, then use **Installed → Git Graph → Review and enable**. Look for a layers icon in the right sidebar or in its `…` overflow menu.
+
+Adding the source checkout itself, or using the normal Git URL installer, is not the live-update installation path. Follow [the installation guide](installation.md).
+
+## The panel does not follow project changes
+
+Check that **Git Graph Sync** is still running. Restart it inside an Orca terminal:
+
+```sh
+python3 ~/.local/share/orca-git-graph/run.py watch
+```
+
+Run `doctor` and confirm the configured Orca profile. A switch normally takes the selection poll plus Git collection and Orca's Development reload. A large repository may take longer.
+
+If the installed HTML changes but Orca does not reload, verify that you registered the runtime path under **Development**, not a copied Local folder installation. Turn to another sidebar tab and back to test remounting. A newer Orca release may require an integration update.
+
+## The panel shows a setup message or never updates
+
+You likely registered the source `plugin` directory or a static installation copy. Run `python3 install.py` and register the exact absolute path printed by the installer. Keep the sync process running.
+
+## The graph is blank or reports unavailable history
+
+The selected folder may have no Git repository or no commits, or the process may not be allowed to read it. Confirm `git -C "/path/to/repository" log -1` from the same Orca terminal. Remote workspaces are not supported in this release.
+
+On macOS, background LaunchAgents can lack Desktop/Documents access even when Orca can read those folders. This package deliberately starts the watcher in an Orca terminal, using the application's normal access. Do not solve this by exposing the graph over a public server.
+
+## Multiple profiles were found
+
+Pass `--profile NAME` or `--orca-state PATH` to the installer. It does not silently choose the most recently modified profile. If you switch Orca profiles later, reinstall with the correct profile and restart the watcher.
+
+## Git Graph Sync is already running
+
+Keep the existing sync terminal, or stop it with `Ctrl+C` before starting another one. The lock is released automatically when the process exits; do not delete the lock file to bypass a live process.
+
+## The installer refuses the destination
+
+Choose a new empty directory or the existing directory created by this installer. It will not replace an unrelated nonempty folder. Stop a running watcher before updating.
+
+## Commits, branches, or file names seem missing
+
+The default window is 400 commits, and branch filtering works only within that window. Increase `limit` in the installed `config.json` and restart, up to 2000. Remote refs are not fetched automatically. Changed files are capped at 200 per commit; merges may show none, and renames appear as separate additions and deletions.
+
+## The graph is too narrow
+
+Drag the left boundary of the right sidebar to widen it, or scroll the graph horizontally. This plugin is a sidebar tab adjacent to Source Control; it does not replace the built-in file-change list.
+
+## Report a problem
+
+Open a [GitHub issue](https://github.com/pty0220/orca-git-graph/issues/new/choose) with Orca version, OS, Python version, installation method, and reproduction steps. Include a redacted `doctor` result when useful. Do not attach `orca-data.json`, runtime authentication files, private generated HTML, or unredacted screenshots of repository history.
+
+
+---
+
+# Orca Git Graph FAQ
+
+## What is Orca Git Graph?
+
+An open-source community plugin that displays a Git commit graph in the Orca desktop IDE's right sidebar. A local Python sync process follows the selected project and Git worktree.
+
+## How do I install a Git Graph in Orca?
+
+Clone `https://github.com/pty0220/orca-git-graph`, run `python3 install.py` in an Orca terminal, and register the printed runtime plugin path under **Settings → Plugins → Development**. Review and enable Git Graph, then click its layers icon. Keep Git Graph Sync running.
+
+## Does it follow the project selected in Orca's left sidebar?
+
+Yes, for local workspaces. It tracks the exact selected worktree, so two worktrees of the same repository can show different branches or detached HEADs. Selection is polled every 0.75 seconds; display also depends on Git collection and Orca's reload delay.
+
+## Is it the VS Code Git Graph extension?
+
+No. It is an independent implementation for Orca using Python, HTML, JavaScript, and SVG. It is not affiliated with Orca or the VS Code Git Graph extension.
+
+## Can I install it with Orca's Git URL plugin installer?
+
+That can load a static setup placeholder, but it does not set up live history. This release requires the Python installer and **Development path registration**, because Orca must watch a generated HTML file.
+
+## Does it modify or upload my repository?
+
+No. It reads local history and reference metadata. It does not check out branches, commit, fetch, push, upload, or run a public server. Generated private HTML remains in the local runtime directory.
+
+## Do I need Node.js, npm, or a paid service?
+
+No. The runtime uses Python 3.9+ and Git, with no pip dependencies. Playwright is only needed for development browser tests. The project is MIT licensed.
+
+## Does it run after I close the sync terminal?
+
+No. Keep Git Graph Sync running and restart it after quitting Orca. No operating-system startup service is installed.
+
+## Which platforms and Orca versions are supported?
+
+Orca 1.4.185 on macOS is the tested desktop target. Windows and Linux desktop integration is experimental. The plugin/state interfaces are version-dependent; a newer Orca release may require an update. SSH and cloud workspaces are not supported in this release.
+
+## Where should an AI assistant start?
+
+Read `https://pty0220.github.io/orca-git-graph/llms.txt` for the documentation map, then fetch the installation or troubleshooting Markdown. Repository contributors should also read `AGENTS.md`. No special prompt, account, token, or executable agent configuration is needed to read the documentation.

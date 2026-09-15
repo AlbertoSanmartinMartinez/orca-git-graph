@@ -1,0 +1,14 @@
+{
+  "manifestVersion": 1,
+  "id": "git-graph",
+  "publisher": "pty0220",
+  "name": "Git Graph",
+  "version": "0.1.0",
+  "description": "A Git commit graph in Orca's right sidebar that follows the active local workspace. Branches, tags, search, and commit details.",
+  "author": {"name": "Tae Young Park", "url": "https://github.com/pty0220"},
+  "repository": "https://github.com/pty0220/orca-git-graph",
+  "engines": {"orca": ">=1.4.185"},
+  "pluginApi": 1,
+  "contributes": {"panels": [{"id": "history", "title": "Git Graph", "icon": "layers", "entry": "panel.html"}]},
+  "capabilities": []
+}

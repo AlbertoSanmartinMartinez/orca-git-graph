@@ -1,0 +1,26 @@
+# Orca Git Graph
+
+> Open-source Git commit graph plugin for the Orca desktop IDE's right sidebar. Follows the selected local project and Git worktree. Python 3.9+ and Git; MIT license.
+
+Canonical repository: https://github.com/pty0220/orca-git-graph
+Documentation: https://pty0220.github.io/orca-git-graph/
+Initial release: 0.1.0. Tested desktop integration: Orca 1.4.185 on macOS. Linux/Windows desktop support is experimental. Remote workspaces are unsupported.
+
+Install with `git clone https://github.com/pty0220/orca-git-graph.git`, then `python3 install.py` in the checkout. Register the printed runtime plugin folder under Orca Settings > Plugins > Development and review/enable it. Keep the separate Git Graph Sync terminal running. The generic Git URL plugin installer is not the live-update installation path.
+
+The software reads local Git metadata, does not upload it, and does not modify repositories. The public demo is fictional. This is an independent community implementation, not an official Orca or VS Code extension.
+
+## Documentation
+
+- [Overview](https://pty0220.github.io/orca-git-graph/index.md): Features, requirements, quick start, and limitations.
+- [Installation](https://pty0220.github.io/orca-git-graph/installation.md): Clone or ZIP setup, one-time panel registration, profiles, updates, and uninstall.
+- [Troubleshooting](https://pty0220.github.io/orca-git-graph/troubleshooting.md): Missing panel, stale selection, state-file discovery, permissions, and duplicate sync processes.
+- [Architecture](https://pty0220.github.io/orca-git-graph/architecture.md): Module map, read-only Git data flow, sandbox, and version-dependent Orca integration.
+- [FAQ](https://pty0220.github.io/orca-git-graph/faq.md): Direct answers about installation, worktree following, platform support, and privacy.
+
+## Optional
+
+- [Full documentation](https://pty0220.github.io/orca-git-graph/llms-full.txt): Combined Markdown for clients that prefer a single document.
+- [Contributor guidance](https://raw.githubusercontent.com/pty0220/orca-git-graph/main/AGENTS.md): Repository layout and validation commands for coding assistants.
+- [Changelog](https://raw.githubusercontent.com/pty0220/orca-git-graph/main/CHANGELOG.md): Release history.
+- [License](https://raw.githubusercontent.com/pty0220/orca-git-graph/main/LICENSE): MIT terms.

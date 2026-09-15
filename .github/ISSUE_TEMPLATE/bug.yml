@@ -1,0 +1,29 @@
+name: Bug report
+description: Report a reproducible Git Graph problem.
+title: "[Bug]: "
+body:
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Orca version, operating system, Python version, and Git Graph version.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Include how you registered the plugin and started Git Graph Sync.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Redacted diagnostics
+      description: Do not upload Orca state files, tokens, private generated HTML, or unredacted repository screenshots.
