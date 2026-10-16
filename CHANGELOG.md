@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Read the workspace state from `profile-state.db`, the SQLite store of Orca 1.4.224. The sync process opens it read-only. Profiles that store the state in `orca-data.json` continue to work.
+- The installer prefers `profile-state.db` when a profile has both state files.
+
 ## 0.1.0 — 2026-09-15
 
 Initial public release.
