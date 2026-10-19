@@ -22,7 +22,7 @@ View branches, merges, tags, authors, and commit details without leaving Orca. S
 
 ## Quick start
 
-**Requirements:** Git, Python 3.9+, and Orca desktop. The desktop integration was tested with **Orca 1.4.185 on macOS**. The sync process also reads the `profile-state.db` workspace state of Orca 1.4.224. Windows and Linux support is experimental; their filesystem/installer paths have automated tests, but desktop integration needs validation.
+**Requirements:** Git, Python 3.9+, and Orca desktop. The desktop integration was tested with **Orca 1.4.185 on macOS**. The sync process also reads the `profile-state.db` workspace state of Orca 1.4.214 and later (checked with 1.4.224). Windows and Linux support is experimental; their filesystem/installer paths have automated tests, but desktop integration needs validation.
 
 Run these commands in an **Orca terminal**:
 
@@ -63,7 +63,7 @@ flowchart LR
     D --> E[Orca right-sidebar plugin]
 ```
 
-The sync process reads the selected workspace from the configured Orca profile's local state file: `orca-data.json` in Orca 1.4.185, or the `profile-state.db` SQLite database in Orca 1.4.224. It polls selection every 0.75 seconds and Git references every 10 seconds. On a change, it replaces the generated HTML atomically; Orca's development-plugin watcher reloads the panel. Workspace switching typically takes about 1–3 seconds for small local repositories, with additional Git collection time for larger histories.
+The sync process reads the selected workspace from the configured Orca profile's local state file: `orca-data.json` in Orca 1.4.185, or the `profile-state.db` SQLite database in Orca 1.4.214 and later. It polls selection every 0.75 seconds and Git references every 10 seconds. On a change, it replaces the generated HTML atomically; Orca's development-plugin watcher reloads the panel. Workspace switching typically takes about 1–3 seconds for small local repositories, with additional Git collection time for larger histories.
 
 This is an independent community project. It is not affiliated with Orca, VS Code, or the VS Code Git Graph extension. It uses Orca's experimental plugin panel API and a version-dependent local state-file integration. See [architecture and compatibility](architecture.md).
 
@@ -111,7 +111,7 @@ Orca Git Graph adds an interactive Git history graph to the Orca desktop IDE's r
 
 ## 1. Check the requirements
 
-- Orca desktop, tested on version 1.4.185 on macOS. The sync process also reads the `profile-state.db` workspace state of Orca 1.4.224.
+- Orca desktop, tested on version 1.4.185 on macOS. The sync process also reads the `profile-state.db` workspace state of Orca 1.4.214 and later (checked with 1.4.224).
 - Python 3.9 or later: `python3 --version`.
 - Git: `git --version`.
 - A local repository already opened in Orca.
@@ -217,7 +217,7 @@ Default Orca data roots:
 | Linux | `${XDG_CONFIG_HOME:-~/.config}/orca` |
 | Windows | `%APPDATA%\orca` |
 
-`ORCA_USER_DATA_PATH`, when set, overrides the root. The installer searches profile directories for `profile-state.db` (Orca 1.4.224) or `orca-data.json` (Orca 1.4.185). If a profile has both files, it uses `profile-state.db`. If multiple profiles exist, it asks for an explicit `--profile` or `--orca-state` argument rather than choosing one silently.
+`ORCA_USER_DATA_PATH`, when set, overrides the root. The installer searches profile directories for `profile-state.db` (Orca 1.4.214 and later) or `orca-data.json` (Orca 1.4.185). If a profile has both files, it uses `profile-state.db`. If multiple profiles exist, it asks for an explicit `--profile` or `--orca-state` argument rather than choosing one silently.
 
 ## Configuration
 
@@ -275,7 +275,7 @@ Orca Git Graph combines a standard-library Python sync process with an Orca plug
 
 ## Data flow
 
-1. Read the configured profile's state: `profile-state.db` (Orca 1.4.224) or `orca-data.json` (Orca 1.4.185).
+1. Read the configured profile's state: `profile-state.db` (Orca 1.4.214 and later) or `orca-data.json` (Orca 1.4.185).
 2. Resolve `workspaceSession.activeWorktreeId` to the exact selected local worktree path.
 3. Read Git commits, references, HEAD, upstream divergence, and changed-file names with argument-based subprocess calls.
 4. Escape commit metadata before embedding it in a self-contained HTML document.
@@ -286,7 +286,7 @@ Orca Git Graph combines a standard-library Python sync process with an Orca plug
 
 ### State formats
 
-Orca 1.4.185 stores the state in one JSON file, `orca-data.json`. Orca 1.4.224 stores it in a SQLite database, `profile-state.db`. Its `profile_state_documents` table has one JSON `payload` for each former top-level key of `orca-data.json`. The sync process reads only the `workspaceSession`, `repos`, and `folderWorkspaces` rows, so the same selection rules apply to both formats. If a profile has both files, the installer uses `profile-state.db`.
+Orca 1.4.185 stores the state in one JSON file, `orca-data.json`. Orca 1.4.214 and later store it in a SQLite database, `profile-state.db`. Its `profile_state_documents` table has one JSON `payload` for each former top-level key of `orca-data.json`. The sync process reads only the `workspaceSession`, `repos`, and `folderWorkspaces` rows, so the same selection rules apply to both formats. If a profile has both files, the installer uses `profile-state.db`. Orca imports `orca-data.json` once and does not update it after that, so the file becomes stale. For this reason, the sync process also reads `profile-state.db` when `config.json` names an `orca-data.json` in the same folder.
 
 The sync process opens the database with SQLite's read-only mode (`mode=ro`). Orca keeps the database in WAL mode, so the read does not block Orca's writes and sees only committed state. When Orca is closed, SQLite can create empty `-wal` and `-shm` files next to the database. The database file itself does not change.
 
@@ -304,7 +304,7 @@ The sync process opens the database with SQLite's read-only mode (`mode=ro`). Or
 
 ## Compatibility contract
 
-The initial desktop target is Orca 1.4.185 on macOS. The state reader also supports the `profile-state.db` store of Orca 1.4.224 on macOS. The plugin manifest requires `>=1.4.185`, but that is a minimum version gate, not a guarantee that every later Orca build is compatible. Both the plugin API and the persisted selection format are experimental/version-dependent.
+The initial desktop target is Orca 1.4.185 on macOS. The state reader also supports the `profile-state.db` store of Orca 1.4.214 and later, checked with 1.4.224 on macOS. The plugin manifest requires `>=1.4.185`, but that is a minimum version gate, not a guarantee that every later Orca build is compatible. Both the plugin API and the persisted selection format are experimental/version-dependent.
 
 Linux and Windows have filesystem and process-lock implementations and automated core checks. Their Orca desktop registration, profile layout, and live-reload behavior are not yet end-to-end validated. Remote/SSH/cloud workspaces are intentionally unsupported.
 
@@ -345,7 +345,7 @@ python3 ~/.local/share/orca-git-graph/run.py watch
 
 Run `doctor` and confirm the configured Orca profile. A switch normally takes the selection poll plus Git collection and Orca's Development reload. A large repository may take longer.
 
-If you updated Orca after the installation, the configured state file can be out of date. Orca 1.4.224 stores the workspace state in `profile-state.db` instead of `orca-data.json`. Stop Git Graph Sync, run `python3 install.py` again from the source checkout, and start the watcher. `doctor` shows the state file that the installation uses.
+If you updated Orca after the installation, the configured state file can be out of date. Orca 1.4.214 and later store the workspace state in `profile-state.db` and stop updating `orca-data.json`. The sync process reads `profile-state.db` when it is next to the configured `orca-data.json`. To update `config.json` as well, stop Git Graph Sync, run `python3 install.py` again from the source checkout, and start the watcher. `doctor` shows the state file that the sync process reads.
 
 If the installed HTML changes but Orca does not reload, verify that you registered the runtime path under **Development**, not a copied Local folder installation. Turn to another sidebar tab and back to test remounting. A newer Orca release may require an integration update.
 
@@ -422,7 +422,7 @@ No. Keep Git Graph Sync running and restart it after quitting Orca. No operating
 
 ## Which platforms and Orca versions are supported?
 
-Orca 1.4.185 on macOS is the tested desktop target. The sync process also reads the `profile-state.db` workspace state of Orca 1.4.224. Windows and Linux desktop integration is experimental. The plugin/state interfaces are version-dependent; a newer Orca release may require an update. SSH and cloud workspaces are not supported in this release.
+Orca 1.4.185 on macOS is the tested desktop target. The sync process also reads the `profile-state.db` workspace state of Orca 1.4.214 and later (checked with 1.4.224). Windows and Linux desktop integration is experimental. The plugin/state interfaces are version-dependent; a newer Orca release may require an update. SSH and cloud workspaces are not supported in this release.
 
 ## Where should an AI assistant start?
 

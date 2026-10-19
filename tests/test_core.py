@@ -80,6 +80,16 @@ class WorkspaceTests(unittest.TestCase):
                 self.assertEqual(discover_state().name, "profile-state.db")
                 self.assertEqual(discover_state(profile="local-default").name, "profile-state.db")
 
+    def test_stale_json_next_to_a_database_is_not_read(self):
+        stale = copy.deepcopy(self.state)
+        stale["workspaceSession"]["activeWorktreeId"] = "repo::" + str(Path(tempfile.gettempdir()) / "old worktree")
+        with tempfile.TemporaryDirectory() as root:
+            profile = Path(root) / "profiles" / "local-default"
+            write_state_database(profile / "profile-state.db", self.state)
+            (profile / "orca-data.json").write_text(json.dumps(stale))
+            self.assertEqual(read_selection(profile / "orca-data.json")["path"], self.path)
+            self.assertEqual(discover_state(profile / "orca-data.json").name, "profile-state.db")
+
     def test_mixed_profile_formats_require_explicit_choice(self):
         with tempfile.TemporaryDirectory() as root:
             for name, state in (("personal", "orca-data.json"), ("work", "profile-state.db")):

@@ -16,7 +16,7 @@ python3 ~/.local/share/orca-git-graph/run.py watch
 
 Run `doctor` and confirm the configured Orca profile. A switch normally takes the selection poll plus Git collection and Orca's Development reload. A large repository may take longer.
 
-If you updated Orca after the installation, the configured state file can be out of date. Orca 1.4.224 stores the workspace state in `profile-state.db` instead of `orca-data.json`. Stop Git Graph Sync, run `python3 install.py` again from the source checkout, and start the watcher. `doctor` shows the state file that the installation uses.
+If you updated Orca after the installation, the configured state file can be out of date. Orca 1.4.214 and later store the workspace state in `profile-state.db` and stop updating `orca-data.json`. The sync process reads `profile-state.db` when it is next to the configured `orca-data.json`. To update `config.json` as well, stop Git Graph Sync, run `python3 install.py` again from the source checkout, and start the watcher. `doctor` shows the state file that the sync process reads.
 
 If the installed HTML changes but Orca does not reload, verify that you registered the runtime path under **Development**, not a copied Local folder installation. Turn to another sidebar tab and back to test remounting. A newer Orca release may require an integration update.
 

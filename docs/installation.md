@@ -4,7 +4,7 @@ Orca Git Graph adds an interactive Git history graph to the Orca desktop IDE's r
 
 ## 1. Check the requirements
 
-- Orca desktop, tested on version 1.4.185 on macOS. The sync process also reads the `profile-state.db` workspace state of Orca 1.4.224.
+- Orca desktop, tested on version 1.4.185 on macOS. The sync process also reads the `profile-state.db` workspace state of Orca 1.4.214 and later (checked with 1.4.224).
 - Python 3.9 or later: `python3 --version`.
 - Git: `git --version`.
 - A local repository already opened in Orca.
@@ -110,7 +110,7 @@ Default Orca data roots:
 | Linux | `${XDG_CONFIG_HOME:-~/.config}/orca` |
 | Windows | `%APPDATA%\orca` |
 
-`ORCA_USER_DATA_PATH`, when set, overrides the root. The installer searches profile directories for `profile-state.db` (Orca 1.4.224) or `orca-data.json` (Orca 1.4.185). If a profile has both files, it uses `profile-state.db`. If multiple profiles exist, it asks for an explicit `--profile` or `--orca-state` argument rather than choosing one silently.
+`ORCA_USER_DATA_PATH`, when set, overrides the root. The installer searches profile directories for `profile-state.db` (Orca 1.4.214 and later) or `orca-data.json` (Orca 1.4.185). If a profile has both files, it uses `profile-state.db`. If multiple profiles exist, it asks for an explicit `--profile` or `--orca-state` argument rather than choosing one silently.
 
 ## Configuration
 

@@ -1,7 +1,8 @@
 """Isolate the experimental Orca state integration here.
 
-Orca 1.4.185 keeps the state in orca-data.json. Orca 1.4.224 keeps it in profile-state.db,
-with one JSON document per former top-level key of orca-data.json.
+Orca 1.4.185 keeps the state in orca-data.json. Orca 1.4.214 and later keep it in
+profile-state.db, with one JSON document per former top-level key of orca-data.json. They
+import orca-data.json once and never update it again, so that file becomes stale.
 """
 import json
 import os
@@ -32,12 +33,18 @@ def profile_state(directory):
     return next((directory / name for name in STATE_FILES if (directory / name).is_file()), None)
 
 
+def current_state_file(path):
+    path = Path(path)
+    database = path.with_name("profile-state.db")
+    return database if path.name == "orca-data.json" and database.is_file() else path
+
+
 def discover_state(explicit=None, profile=None):
     if explicit:
         path = Path(explicit).expanduser().resolve()
         if not path.is_file():
             raise WorkspaceError("The supplied Orca state file does not exist.")
-        return path
+        return current_state_file(path)
     root = data_root()
     if profile:
         if Path(profile).name != profile or profile in (".", ".."):
@@ -102,9 +109,10 @@ def load_state_database(path):
 
 
 def load_state(state_path):
-    if Path(state_path).suffix == ".db":
-        return load_state_database(state_path)
-    with Path(state_path).open(encoding="utf-8") as source:
+    path = current_state_file(state_path)
+    if path.suffix == ".db":
+        return load_state_database(path)
+    with path.open(encoding="utf-8") as source:
         # Bound malformed or unexpected files. Never print or copy the state document.
         raw = source.read(MAX_STATE_SIZE + 1)
     if len(raw) > MAX_STATE_SIZE:
